@@ -10,15 +10,15 @@ LDFLAGS=${MKLROOT}/libmkl_def.so \
 		${MKLROOT}/libmkl_intel_lp64.so \
 		${MKLROOT}/libmkl_sequential.so \
 		-lpthread -lm -ldl \
-	     -lblas -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -L/opt/intel/lib/intel64 -L/opt/intel/mkl/lib/intel64 
+	    -lblas -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -L/opt/intel/lib/intel64 -L/opt/intel/mkl/lib/intel64 
 
 all: $(PY_OBJ)
 
 $(PY_OBJ): matrix.o
-	$(CXX) $(CXXFLAGS) $^  $(HEADERS) $(PIBINDFLAG) ${LDFLAGS}  -o $@
+	$(CXX) $(CXXFLAGS) $^  $(HEADERS) $(PIBINDFLAG) -o $@ ${LDFLAGS}
 
 matrix.o: matrix.cpp matrix.hpp
-	$(CXX) $(CXXFLAGS)  $< $(HEADERS) $(PIBINDFLAG) ${LDFLAGS} -c -o $@
+	$(CXX) $(CXXFLAGS)  $< $(HEADERS) $(PIBINDFLAG) -c -o $@ ${LDFLAGS} 
 
 test: all
 	python3 -m pytest -v -s

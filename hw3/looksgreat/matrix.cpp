@@ -2,9 +2,11 @@
 #include<bits/stdc++.h>
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
-#include <mkl.h>
-#include <mkl_lapack.h>
-#include <mkl_lapacke.h>
+#include <pybind11/operators.h>
+#include <mkl/mkl.h>
+#include <mkl/mkl_cblas.h>
+#include <mkl/mkl_lapack.h>
+#include <mkl/mkl_lapacke.h>
 using namespace std;
 namespace py=pybind11;
 
