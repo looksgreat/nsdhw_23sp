@@ -116,13 +116,13 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
 }*/
 Matrix multiply_mkl(Matrix const &mat1, Matrix const &mat2)
 {
-    if (mat1.ncol() != mat2.nrow()) {
+    if (mat1.cols() != mat2.rows()) {
         exit(1);
     }
 
     mkl_set_num_threads(1);
 
-    Matrix ret(mat1.nrow(), mat2.ncol());
+    Matrix ret(mat1.rows(), mat2.cols());
 
     cblas_dgemm(CblasRowMajor /* const CBLAS_LAYOUT Layout */
                 ,
@@ -130,27 +130,27 @@ Matrix multiply_mkl(Matrix const &mat1, Matrix const &mat2)
                 ,
                 CblasNoTrans /* const CBLAS_TRANSPOSE transb */
                 ,
-                mat1.nrow() /* const MKL_INT m */
+                mat1.rows() /* const MKL_INT m */
                 ,
-                mat2.ncol() /* const MKL_INT n */
+                mat2.cols() /* const MKL_INT n */
                 ,
-                mat1.ncol() /* const MKL_INT k */
+                mat1.cols() /* const MKL_INT k */
                 ,
                 1.0 /* const double alpha */
                 ,
-                mat1.data() /* const double *a */
+                &mat1.data()[0][0] /* const double *a */
                 ,
-                mat1.ncol() /* const MKL_INT lda */
+                mat1.cols() /* const MKL_INT lda */
                 ,
-                mat2.data() /* const double *b */
+                &mat2.data()[0][0] /* const double *b */
                 ,
-                mat2.ncol() /* const MKL_INT ldb */
+                mat2.cols() /* const MKL_INT ldb */
                 ,
                 0.0 /* const double beta */
                 ,
-                ret.data() /* double * c */
+                &ret.data()[0][0] /* double * c */
                 ,
-                ret.ncol() /* const MKL_INT ldc */
+                ret.cols() /* const MKL_INT ldc */
     );
 
     return ret;
