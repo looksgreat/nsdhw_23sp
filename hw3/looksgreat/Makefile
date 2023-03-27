@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -O3 -shared
+CXXFLAGS = -std=c++11 -O3 -shared -lblas
 HEADERS = -I. #-I/DATA/lllll/.local/lib/python3.6/site-packages/pybind11/include
 PIBINDFLAG = -fPIC `python3 -m pybind11 --includes` `python3-config --includes --ldflags`
 PY_OBJ = _matrix.so
@@ -21,7 +21,7 @@ matrix.o: matrix.cpp matrix.hpp
 	$(CXX) $(CXXFLAGS)  $< $(HEADERS) $(PIBINDFLAG) -c -o $@ ${LDFLAGS} 
 
 test: all
-	python3 -m pytest -v -s
+	env PYTHONPATH=".:$PYTHONPATH" python3 -m pytest -v -s
 
 clean:
 	rm *.o *.so __pycache__ .pytest_cache performance.txt -r -f
