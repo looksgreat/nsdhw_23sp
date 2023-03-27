@@ -2,6 +2,8 @@
 #define MATRIX_HPP
 
 #include <vector>
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 using namespace std;
 class Matrix {
 
@@ -16,8 +18,21 @@ public:
     double &operator()(int x, int y){
         return m_data[y][x];
     }
-     double operator()(int x, int y) const{
+    double operator()(int x, int y) const{
         return m_data[y][x];
+    }
+    bool operator ==(const Matrix &m) const{
+        if (m_rows != m.rows() || m_cols != m.cols()){
+            return false;
+        }
+        for (int i = 0; i < m_rows; i++){
+            for (int j = 0; j < m_cols; j++){
+                if (m_data[i][j] != m(i, j)){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     int rows() const{ 
         return m_rows; 

@@ -1,6 +1,6 @@
 import random
 import time
-
+import pytest
 import _matrix
 
 def test_matrix():
@@ -11,7 +11,7 @@ def test_matrix():
         m1 = _matrix.Matrix(s, s)
         m2 = _matrix.Matrix(s, s)
         for i in range(s):
-            for j in range(s)
+            for j in range(s):
                 m1[i, j] = i*s+j
                 m2[i, j] = i*s+j
 
@@ -26,14 +26,22 @@ def test_matrix():
         m3 = _matrix.multiply_naive(m1, m2)
         end = time.time()
         f.write(str(start-end) + "\n")
-        assert m3 == golden
+        assert m3.rows == golden.rows
+        assert m3.cols == golden.cols
+        for i in range(m3.rows):
+            for j in range(m3.cols):
+                assert m3[i, j] == golden[i, j]
 
         f.write("tile:\n")
         start = time.time()
-        golden = _matrix.multiply_tile(m1, m2, 32)
+        m3 = _matrix.multiply_tile(m1, m2, 32)
         end = time.time()
         f.write(str(start-end) + "\n")
-        assert m3 == golden
+        assert m3.rows == golden.rows
+        assert m3.cols == golden.cols
+        for i in range(m3.rows):
+            for j in range(m3.cols):
+                assert m3[i, j] == golden[i, j]
 
 
 
