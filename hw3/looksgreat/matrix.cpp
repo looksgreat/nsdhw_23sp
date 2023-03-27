@@ -56,8 +56,8 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
 Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
     mkl_set_num_threads(1);
     Matrix ret(m1.rows(), m2.cols());
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , m1.buffer(),
-     m1.cols(), m2.buffer(), m2.cols(), 0.0, ret.buffer(), ret.cols());
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , &m1.data()[0][0],
+     m1.cols(), &m2.data()[0][0], m2.cols(), 0.0, &ret.data()[0][0], ret.cols());
     return ret;
     /*Matrix ret(m1.rows(), m2.cols());
     for (int i = 0; i < m1.rows(); i++) {
