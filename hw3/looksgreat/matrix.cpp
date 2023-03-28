@@ -96,13 +96,13 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
     
 }
 
-/*Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
+Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
     mkl_set_num_threads(1);
     Matrix ret(m1.rows(), m2.cols());
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , &m1.data()[0][0],
      m1.cols(), &m2.data()[0][0], m2.cols(), 0.0, &ret.data()[0][0], ret.cols());
     return ret;
-    /*Matrix ret(m1.rows(), m2.cols());
+    Matrix ret(m1.rows(), m2.cols());
     for (int i = 0; i < m1.rows(); i++) {
         for (int j = 0; j < m2.cols(); j++) {
             double sum = 0.0;
@@ -113,50 +113,10 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
         }
     }
     return ret;
-}*/
-Matrix multiply_mkl(Matrix const &mat1, Matrix const &mat2)
-{
-    if (mat1.cols() != mat2.rows()) {
-        exit(1);
-    }
-
-    mkl_set_num_threads(1);
-
-    Matrix ret(mat1.rows(), mat2.cols());
-
-    cblas_dgemm(CblasRowMajor /* const CBLAS_LAYOUT Layout */
-                ,
-                CblasNoTrans /* const CBLAS_TRANSPOSE transa */
-                ,
-                CblasNoTrans /* const CBLAS_TRANSPOSE transb */
-                ,
-                mat1.rows() /* const MKL_INT m */
-                ,
-                mat2.cols() /* const MKL_INT n */
-                ,
-                mat1.cols() /* const MKL_INT k */
-                ,
-                1.0 /* const double alpha */
-                ,
-                &mat1.data()[0][0] /* const double *a */
-                ,
-                mat1.cols() /* const MKL_INT lda */
-                ,
-                &mat2.data()[0][0] /* const double *b */
-                ,
-                mat2.cols() /* const MKL_INT ldb */
-                ,
-                0.0 /* const double beta */
-                ,
-                &ret.data()[0][0] /* double * c */
-                ,
-                ret.cols() /* const MKL_INT ldc */
-    );
-
-    return ret;
 }
 
-/*PYBIND11_MODULE(_matrix, m){
+
+PYBIND11_MODULE(_matrix, m){
     m.doc() = "matrix-matrix multiplication";
     m.def("multiply_naive", &multiply_naive, "naive");
     m.def("multiply_tile", &multiply_tile, "tile");
@@ -173,43 +133,4 @@ Matrix multiply_mkl(Matrix const &mat1, Matrix const &mat2)
         .def("__getitem__", [](const Matrix &self, std::pair<int, int> idx) {
             return self(idx.first, idx.second);
         });
-}*/
-PYBIND11_MODULE(_matrix, m) {
-	// py::class_<Matrix>(m, "Matrix", py::buffer_protocol())
-	// .def(py::init<int, int>())
-   	// .def_buffer([](Matrix &m) -> py::buffer_info {
-    //     return py::buffer_info(
-    //         m.data(),                               /* Pointer to buffer */
-    //         sizeof(float),                          /* Size of one scalar */
-    //         py::format_descriptor<float>::format(), /* Python struct-style format descriptor */
-    //         2,                                      /* Number of dimensions */
-    //         { m.nrow(), m.ncol() },                 /* Buffer dimensions */
-    //         { sizeof(float) * m.ncol(),             /* Strides (in bytes) for each index */
-    //           sizeof(float) }
-    //     );
-    // });
-    py::class_<Matrix>(m, "Matrix")
-    .def(py::init<int, int>())
-    .def("__getitem__", [](Matrix &self, pybind11::args args)
-            { 	 
-             	//std::cout << (*args[0]) << std::endl;
-            	py::tuple t = args[0];
-            	// for (size_t it=0; it<t.size(); ++it) {
-        		// 	py::print(py::str("{}").format(t[it].cast<int>()));
-      			// }
-            	return self(t[0].cast<int>(),t[1].cast<int>()); 
-         	})
-    .def("__setitem__",[](Matrix &self, pybind11::args args)
-            { 	 
-            	// std::cout << (*args[0]) << " "<< *args[1] << std::endl;
-            	py::tuple t = args[0];	
-            	self(t[0].cast<int>(),t[1].cast<int>()) = args[1].cast<int>(); 
-         	})
-    .def_property_readonly("rows", &Matrix::rows)
-    .def_property_readonly("cols", &Matrix::cols)
-    .def("__eq__", &Matrix::operator ==);
-
-    m.def("multiply_naive", &multiply_naive, "basic Matrix-Matrix Multiplication");
-    m.def("multiply_tile", &multiply_tile, "tile Matrix-Matrix Multiplication");
-    m.def("multiply_mkl", &multiply_mkl, "mkl Matrix-Matrix Multiplication");
 }
