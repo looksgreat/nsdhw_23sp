@@ -102,7 +102,7 @@ Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , &m1.data()[0][0],
      m1.cols(), &m2.data()[0][0], m2.cols(), 0.0, &ret.data()[0][0], ret.cols());
     return ret;
-    Matrix ret(m1.rows(), m2.cols());
+    /*Matrix ret(m1.rows(), m2.cols());
     for (int i = 0; i < m1.rows(); i++) {
         for (int j = 0; j < m2.cols(); j++) {
             double sum = 0.0;
@@ -112,7 +112,7 @@ Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
             ret(i, j) = sum;
         }
     }
-    return ret;
+    return ret;*/
 }
 
 
