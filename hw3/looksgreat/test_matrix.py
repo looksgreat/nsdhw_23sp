@@ -11,8 +11,8 @@ def test_matrix():
         m2 = _matrix.Matrix(s, s)
         for i in range(s):
             for j in range(s):
-                m1[i, j] = i*s+j
-                m2[i, j] = i*s+j
+                m1[i, j] = i+j
+                m2[i, j] = i+j
 
         f.write("mkl:\n")
         start = time.time()

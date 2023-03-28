@@ -2,10 +2,10 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 #include "pybind11/operators.h"
-#include <mkl/mkl.h>
+/*#include <mkl/mkl.h>
 #include <mkl/mkl_cblas.h>
 #include <mkl/mkl_lapack.h>
-#include <mkl/mkl_lapacke.h>
+#include <mkl/mkl_lapacke.h>*/
 using namespace std;
 namespace py=pybind11;
 class Matrix {
@@ -17,6 +17,9 @@ public:
     }
     Matrix(const Matrix &m) : m_cols(m.cols()), m_rows(m.rows()){
         m_data = m.data();
+    }
+    ~Matrix(){
+        m_data.clear();
     }
     double &operator()(int x, int y){
         return m_data[y][x];
@@ -97,12 +100,12 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
 }
 
 Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
-    mkl_set_num_threads(1);
+    /*mkl_set_num_threads(1);
     Matrix ret(m1.rows(), m2.cols());
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , &m1.data()[0][0],
      m1.cols(), &m2.data()[0][0], m2.cols(), 0.0, &ret.data()[0][0], ret.cols());
-    return ret;
-    /*Matrix ret(m1.rows(), m2.cols());
+    return ret;*/
+    Matrix ret(m1.rows(), m2.cols());
     for (int i = 0; i < m1.rows(); i++) {
         for (int j = 0; j < m2.cols(); j++) {
             double sum = 0.0;
@@ -112,7 +115,7 @@ Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
             ret(i, j) = sum;
         }
     }
-    return ret;*/
+    return ret;
 }
 
 
