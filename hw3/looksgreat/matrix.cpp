@@ -12,20 +12,29 @@ class Matrix {
 
 
 public:
-    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(vector<vector<double>>()){
-        m_data.resize(m_rows, vector<double>(m_cols, 0));
+    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(new double[rows*cols]){
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                m_data[i*cols+j] = 0.0;
+            }
+        }
     }
     Matrix(const Matrix &m) : m_cols(m.cols()), m_rows(m.rows()){
-        m_data = m.data();
+        m_data = new double[m_rows*m_cols];
+        for (int i = 0; i < m_rows; i++){
+            for (int j = 0; j < m_cols; j++){
+                m_data[i*m_cols+j] = m(i, j);
+            }
+        }
     }
     ~Matrix(){
-        m_data.clear();
+        delete[] m_data;
     }
     double &operator()(int x, int y){
-        return m_data[y][x];
+        return m_data[y*m_cols+x];
     }
     double operator()(int x, int y) const{
-        return m_data[y][x];
+        return m_data[y*m_cols+x];
     }
     bool operator ==(const Matrix &m) const{
         if (m_rows != m.rows() || m_cols != m.cols()){
@@ -33,7 +42,7 @@ public:
         }
         for (int i = 0; i < m_rows; i++){
             for (int j = 0; j < m_cols; j++){
-                if (m_data[i][j] != m(i, j)){
+                if (m_data[i*m_cols+j] != m(i, j)){
                     return false;
                 }
             }
@@ -46,14 +55,14 @@ public:
     int cols() const{ 
         return m_cols;
     }
-    vector<vector<double>> data() const{
+    double* data() const{
         return m_data;
     }
 
 private:
     int m_rows;
     int m_cols;
-    vector<vector<double>> m_data;
+    double *m_data;
 };
 
 Matrix multiply_naive(Matrix const &m1, Matrix const &m2){
@@ -102,8 +111,8 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
 Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
     mkl_set_num_threads(1);
     Matrix ret(m1.rows(), m2.cols());
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , &m1.data()[0][0],
-     m1.cols(), &m2.data()[0][0], m2.cols(), 0.0, &ret.data()[0][0], ret.cols());
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , m1.data(),
+     m1.cols(), m2.data(), m2.cols(), 0.0, ret.data(), ret.cols());
     return ret;
     /*Matrix ret(m1.rows(), m2.cols());
     for (int i = 0; i < m1.rows(); i++) {
