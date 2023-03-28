@@ -19,7 +19,7 @@ public:
             }
         }
     }
-    Matrix(const Matrix &m) : m_cols(m.cols()), m_rows(m.rows()){
+    Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
         m_data = new double[m_rows*m_cols];
         for (int i = 0; i < m_rows; i++){
             for (int j = 0; j < m_cols; j++){
@@ -37,7 +37,7 @@ public:
         return m_data[y*m_cols+x];
     }
     bool operator ==(const Matrix &m) const{
-        if (m_rows != m.rows() || m_cols != m.cols()){
+        if (m_rows != m.nrow() || m_cols != m.ncol()){
             return false;
         }
         for (int i = 0; i < m_rows; i++){
@@ -49,10 +49,10 @@ public:
         }
         return true;
     }
-    int rows() const{ 
+    int nrow() const{ 
         return m_rows; 
     }
-    int cols() const{ 
+    int ncol() const{ 
         return m_cols;
     }
     double* data() const{
@@ -66,11 +66,11 @@ private:
 };
 
 Matrix multiply_naive(Matrix const &m1, Matrix const &m2){
-    Matrix ret(m1.rows(), m2.cols());
-    for (int i = 0; i < m1.rows(); i++) {
-        for (int j = 0; j < m2.cols(); j++) {
+    Matrix ret(m1.nrow(), m2.ncol());
+    for (int i = 0; i < m1.nrow(); i++) {
+        for (int j = 0; j < m2.ncol(); j++) {
             double sum = 0.0;
-            for (int k = 0; k < m1.cols(); k++) {
+            for (int k = 0; k < m1.ncol(); k++) {
                 sum += m1(i, k) * m2(k, j);
             }
             ret(i, j) = sum;
@@ -80,9 +80,9 @@ Matrix multiply_naive(Matrix const &m1, Matrix const &m2){
 }
 
 Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
-    int m = m1.rows();
-    int n = m2.cols();
-    int k = m1.cols();
+    int m = m1.nrow();
+    int n = m2.ncol();
+    int k = m1.ncol();
 
     Matrix ret(m, n);
     for (int i0 = 0; i0 < m; i0 += tile_size) {
@@ -110,15 +110,15 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
 
 Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
     mkl_set_num_threads(1);
-    Matrix ret(m1.rows(), m2.cols());
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.rows(),  m2.cols(), m1.cols(), 1.0 , m1.data(),
-     m1.cols(), m2.data(), m2.cols(), 0.0, ret.data(), ret.cols());
+    Matrix ret(m1.nrow(), m2.ncol());
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.nrow(),  m2.ncol(), m1.ncol(), 1.0 , m1.data(),
+     m1.ncol(), m2.data(), m2.ncol(), 0.0, ret.data(), ret.ncol());
     return ret;
-    /*Matrix ret(m1.rows(), m2.cols());
-    for (int i = 0; i < m1.rows(); i++) {
-        for (int j = 0; j < m2.cols(); j++) {
+    /*Matrix ret(m1.nrow(), m2.ncol());
+    for (int i = 0; i < m1.nrow(); i++) {
+        for (int j = 0; j < m2.ncol(); j++) {
             double sum = 0.0;
-            for (int k = 0; k < m1.cols(); k++) {
+            for (int k = 0; k < m1.ncol(); k++) {
                 sum += m1(i, k) * m2(k, j);
             }
             ret(i, j) = sum;
@@ -135,8 +135,8 @@ PYBIND11_MODULE(_matrix, m){
     m.def("multiply_mkl", &multiply_mkl, "mkl");
     py::class_<Matrix>(m, "Matrix")
         .def(py::init<int, int>())
-        .def_property_readonly("rows", &Matrix::rows)
-        .def_property_readonly("cols", &Matrix::cols)
+        .def_property_readonly("nrow", [](const Matrix &mat) { return mat.nrow(); })
+        .def_property_readonly("ncol", [](const Matrix &mat) { return mat.ncol(); });
         .def("__eq__", [](const Matrix &a, const Matrix &b) { 
             return a == b; })
         .def("__setitem__", [](Matrix &self, std::pair<int, int> idx, double val) {

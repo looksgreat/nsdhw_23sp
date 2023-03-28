@@ -25,10 +25,10 @@ def test_matrix():
         m3 = _matrix.multiply_naive(m1, m2)
         end = time.time()
         f.write(str(start-end) + "\n")
-        assert m3.rows == golden.rows
-        assert m3.cols == golden.cols
-        for i in range(m3.rows):
-            for j in range(m3.cols):
+        assert m3.nrow == golden.nrow
+        assert m3.ncol == golden.ncol
+        for i in range(m3.nrow):
+            for j in range(m3.ncol):
                 assert m3[i, j] == golden[i, j]
 
         f.write("tile:\n")
@@ -36,10 +36,10 @@ def test_matrix():
         m3 = _matrix.multiply_tile(m1, m2, 32)
         end = time.time()
         f.write(str(start-end) + "\n")
-        assert m3.rows == golden.rows
-        assert m3.cols == golden.cols
-        for i in range(m3.rows):
-            for j in range(m3.cols):
+        assert m3.nrow == golden.nrow
+        assert m3.ncol == golden.ncol
+        for i in range(m3.nrow):
+            for j in range(m3.ncol):
                 assert m3[i, j] == golden[i, j]
 
 
