@@ -136,7 +136,7 @@ PYBIND11_MODULE(_matrix, m){
     py::class_<Matrix>(m, "Matrix")
         .def(py::init<int, int>())
         .def_property_readonly("nrow", [](const Matrix &mat) { return mat.nrow(); })
-        .def_property_readonly("ncol", [](const Matrix &mat) { return mat.ncol(); });
+        .def_property_readonly("ncol", [](const Matrix &mat) { return mat.ncol(); })
         .def("__eq__", [](const Matrix &a, const Matrix &b) { 
             return a == b; })
         .def("__setitem__", [](Matrix &self, std::pair<int, int> idx, double val) {
