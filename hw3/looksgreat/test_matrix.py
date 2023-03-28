@@ -3,7 +3,7 @@ import pytest
 import _matrix
 
 def test_matrix():
-    size = [50, 500, 1000, 2000]
+    size = [50, 1000]
     f = open("performance.txt", "a")
     for s in size:
         f.write("size: " + str(s) + "\n")

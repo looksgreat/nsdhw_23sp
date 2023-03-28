@@ -93,11 +93,9 @@ Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
                 int kmax = std::min(k0 + tile_size, k);
                 for (int i = i0; i < imax; i++) {
                     for (int j = j0; j < jmax; j++) {
-                        double sum = 0.0;
                         for (int l = k0; l < kmax; l++) {
-                            sum += m1(i, l) * m2(l, j);
+                            ret(i, j) += m1(i, l) * m2(l, j);
                         }
-                        ret(i, j) += sum;
                     }
                 }
             }
