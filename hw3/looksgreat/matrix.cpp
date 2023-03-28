@@ -13,11 +13,7 @@ class Matrix {
 
 public:
     Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(new double[rows*cols]){
-        for (int i = 0; i < rows; i++){
-            for (int j = 0; j < cols; j++){
-                m_data[i*cols+j] = 0.0;
-            }
-        }
+        memset(m_data, 0, sizeof(double)*rows*cols);
     }
     Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
         m_data = new double[m_rows*m_cols];
