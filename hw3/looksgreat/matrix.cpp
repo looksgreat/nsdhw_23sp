@@ -42,7 +42,7 @@ public:
         }
         for (int i = 0; i < m_rows; i++){
             for (int j = 0; j < m_cols; j++){
-                if (m_data[i*m_cols+j] != m(i, j)){
+                if ((*this)(i, j) != m(i, j)){
                     return false;
                 }
             }
