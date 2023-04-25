@@ -1,53 +1,50 @@
-#include <iostream>
-#include <vector>
-#include <limits>
-#include <mkl.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
+#include<bits/stdc++.h>
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
+#include "pybind11/operators.h"
+#include <mkl/mkl.h>
+#include <mkl/mkl_cblas.h>
+#include <mkl/mkl_lapack.h>
+#include <mkl/mkl_lapacke.h>
 using namespace std;
-
+namespace py=pybind11;
 
 template <class T>
-class ByteCounter {
-
-    public:
-        using value_type = T;
-        ByteCounter() = default;
-
-        T* allocate(size_t n)
-        {
-            if (n > numeric_limits<size_t>::max()/sizeof(T))
-                throw bad_alloc();
-
-            const size_t bytes = n*sizeof(T);
-            T* ret = static_cast<T*>(malloc(bytes));
-            
-            if (ret)
-            {
-                allocated_ += bytes;
-                return ret;
-            }
-            else
-                throw bad_alloc();
-        }
-
-        void deallocate(T* p, size_t n) noexcept
-        {
-            free(p);
-            deallocated_ += n*sizeof(T);
-        }
-
-        static size_t bytes() { return allocated_ - deallocated_; }
-        static size_t allocated() { return allocated_; }
-        static size_t deallocated() { return deallocated_; }
-
-    private:
-        static size_t allocated_, deallocated_;
+class CustomAllocator{
+public:
+    using value_type = T;
+    CustomAllocator() = default;
+    
+    T* allocate(size_t n){
+        if (n > numeric_limits<size_t>::max()/sizeof(T)) throw bad_alloc();
+        m_allocated += n*sizeof(T);
+        m_byte += n*sizeof(T);
+        T *ret = (T *)(malloc(n*sizeof(T)));
+        if(ret == nullptr)
+            throw std::bad_alloc();
+        return ret;
+    }
+    void deallocate(T *ptr, size_t n){
+        m_deallocated += n*sizeof(T);
+        m_byte -= n*sizeof(T);
+        free(ptr);
+    }
+    static size_t allocated(){
+        return m_allocated;
+    }
+    static size_t deallocated(){
+        return m_deallocated;
+    }
+    static size_t bytes(){
+        return m_byte;
+    }
+private:
+    static size_t m_allocated, m_deallocated , m_byte;
 };
 
-template <class T> size_t ByteCounter<T>::allocated_ = 0;
-template <class T> size_t ByteCounter<T>::deallocated_ = 0;
+template <class T> size_t CustomAllocator<T>::m_allocated = 0;
+template <class T> size_t CustomAllocator<T>::m_deallocated = 0;
+template <class T> size_t CustomAllocator<T>::m_byte = 0;
 
 
 class Matrix {
