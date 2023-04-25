@@ -50,15 +50,15 @@ template <class T> size_t CustomAllocator<T>::m_byte = 0;
 class Matrix {
 public:
     Matrix(): m_row(0), m_col(0) {}
-    Matrix(int nrow, int ncol): m_row(nrow), m_col(ncol), data_(nrow * ncol) {}
+    Matrix(int nrow, int ncol): m_row(nrow), m_col(ncol), m_data(nrow * ncol) {}
 
     int nrow() const { return m_row; }
     int ncol() const { return m_col; }
 
-    double& operator()(int i, int j) { return data_[i * m_col + j]; }
-    const double& operator()(int i, int j) const { return data_[i * m_col + j]; }
-    double* data() { return data_.data(); }
-    const double* data() const { return data_.data(); }
+    double& operator()(int i, int j) { return m_data[i * m_col + j]; }
+    const double& operator()(int i, int j) const { return m_data[i * m_col + j]; }
+    double* data() { return m_data.data(); }
+    const double* data() const { return m_data.data(); }
     bool operator ==(const Matrix &m) const
     {
         if (this->nrow() != m.nrow() || this->ncol() != m.ncol())
