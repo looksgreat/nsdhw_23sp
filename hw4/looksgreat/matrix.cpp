@@ -61,12 +61,8 @@ public:
             }
         }
     }
-    double &operator()(int x, int y){
-        return m_data[y*m_cols+x];
-    }
-    const double &operator() (int x, int y) const{
-        return m_data[y*m_cols+x];
-    }
+    double& operator()(int i, int j) { return m_data[i*m_cols+j]; }
+    const double& operator()(int i, int j) const { return m_data[i*m_cols+j]; }
     bool operator ==(const Matrix &m) const{
         if (m_rows != m.nrow() || m_cols != m.ncol()){
             return false;
