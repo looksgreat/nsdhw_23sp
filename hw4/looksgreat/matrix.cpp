@@ -78,7 +78,7 @@ public:
 
 private:
     int nrow_, ncol_;
-    std::vector<double, ByteCounter<double>> data_;
+    std::vector<double, CustomAllocator<double>> data_;
 };
 
 Matrix multiply_naive(const Matrix& a, const Matrix& b) {
@@ -145,9 +145,9 @@ PYBIND11_MODULE(_matrix, m)
     m.def("multiply_naive", &multiply_naive);
     m.def("multiply_tile", &multiply_tile);
     m.def("multiply_mkl", &multiply_mkl);
-    m.def("bytes", &ByteCounter<double>::bytes);
-    m.def("allocated", &ByteCounter<double>::allocated);
-    m.def("deallocated", &ByteCounter<double>::deallocated);
+    m.def("bytes", &CustomAllocator<double>::bytes);
+    m.def("allocated", &CustomAllocator<double>::allocated);
+    m.def("deallocated", &CustomAllocator<double>::deallocated);
 
     pybind11::class_<Matrix>(m, "Matrix")
         .def(pybind11::init<>())
