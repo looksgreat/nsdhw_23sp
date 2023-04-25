@@ -46,6 +46,7 @@ class Matrix {
 
 
 public:
+    Matrix(): m_rows(0), m_cols(0){}
     Matrix(int rows, int cols) : m_rows(rows), m_cols(cols)/*, m_data(rows*cols)*/{
         //memset(m_data, 0, sizeof(double)*rows*cols);
         m_data(rows*cols, 0.0);
@@ -58,19 +59,10 @@ public:
             }
         }
     }
-    ~Matrix(){
-        delete[] m_data;
-    }
     double &operator()(int x, int y){
         return m_data[y*m_cols+x];
     }
     const double &operator() (int x, int y) const{
-        return m_data[y*m_cols+x];
-    }
-    double operator()(int x, int y) {
-        return m_data[y*m_cols+x];
-    }
-    const double operator() (int x, int y) const{
         return m_data[y*m_cols+x];
     }
     bool operator ==(const Matrix &m) const{
@@ -164,7 +156,7 @@ PYBIND11_MODULE(_matrix, m){
     m.def("allocated", &CustomAllocator<double>::allocated);
     m.def("deallocated", &CustomAllocator<double>::deallocated);
     py::class_<Matrix>(m, "Matrix")
-        .def(pybind11::init<>())
+        .def(py::init<>())
         .def(py::init<int, int>())
         .def("data", pybind11::overload_cast<>(&Matrix::data))
         .def("data", pybind11::overload_cast<>(&Matrix::data, pybind11::const_))
