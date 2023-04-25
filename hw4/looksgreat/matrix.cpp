@@ -15,11 +15,12 @@ public:
     using value_type = T;
     CustomAllocator() = default;
     static size_t bytes(){
-        return m_allocated - m_deallocated;
+        return m_byte;
     }
     T* allocate(size_t n){
         if (n > numeric_limits<size_t>::max()/sizeof(T)) throw bad_alloc();
         m_allocated += n*sizeof(T);
+        m_byte += n*sizeof(T);
         T *ret = (T *)(malloc(n*sizeof(T)));
         if(ret == nullptr)
             throw std::bad_alloc();
@@ -27,6 +28,7 @@ public:
     }
     void deallocate(T *ptr, size_t n){
         m_deallocated += n*sizeof(T);
+        m_byte -= n*sizeof(T);
         free(ptr);
     }
     static size_t allocated(){
@@ -36,11 +38,12 @@ public:
         return m_deallocated;
     }
 private:
-    static size_t m_allocated, m_deallocated;
+    static size_t m_allocated, m_deallocated, m_byte;
 };
 
 template <class T> size_t CustomAllocator<T>::m_allocated = 0;
 template <class T> size_t CustomAllocator<T>::m_deallocated = 0;
+template <class T> size_t CustomAllocator<T>::m_byte = 0;
 
 
 class Matrix {
