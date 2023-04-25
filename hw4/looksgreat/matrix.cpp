@@ -39,7 +39,7 @@ public:
         return m_byte;
     }
 private:
-    static size_t m_allocated = 0, m_deallocated = 0, m_byte = 0;
+    static size_t m_allocated, m_deallocated , m_byte;
 };
 
 template <class T> size_t CustomAllocator<T>::m_allocated = 0;
