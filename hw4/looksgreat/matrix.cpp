@@ -13,8 +13,8 @@ template <class T>
 class CustomAllocator{
 public:
     using value_type = T;
-    CustomAllocator() : m_allocated(0), m_deallocated(0){}
-    int bytes(){
+    CustomAllocator(){}
+    static int bytes(){
         return m_allocated - m_deallocated;
     }
     T* allocate(int n){
@@ -28,15 +28,18 @@ public:
         m_deallocated += n*sizeof(T);
         free(ptr);
     }
-    int allocated(){
+    static int allocated(){
         return m_allocated;
     }
-    int deallocated(){
+    static int deallocated(){
         return m_deallocated;
     }
 private:
-    int m_allocated, m_deallocated;
+    static int m_allocated, m_deallocated;
 };
+
+template <class T> int CustomAllocator<T>::m_allocated = 0;
+template <class T> int CustomAllocator<T>::m_deallocated = 0;
 
 
 class Matrix {
@@ -61,13 +64,13 @@ public:
     double &operator()(int x, int y){
         return m_data[y*m_cols+x];
     }
-    const double &operator() const(int x, int y){
+    const double &operator() (int x, int y) const{
         return m_data[y*m_cols+x];
     }
-    double operator()(int x, int y) const{
+    double operator()(int x, int y) {
         return m_data[y*m_cols+x];
     }
-    const double operator() const(int x, int y) const{
+    const double operator() (int x, int y) const{
         return m_data[y*m_cols+x];
     }
     bool operator ==(const Matrix &m) const{
