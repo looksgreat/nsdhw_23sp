@@ -42,16 +42,16 @@ private:
     static size_t m_allocated = 0, m_deallocated = 0, m_byte = 0;
 };
 
-/*template <class T> size_t CustomAllocator<T>::m_allocated = 0;
+template <class T> size_t CustomAllocator<T>::m_allocated = 0;
 template <class T> size_t CustomAllocator<T>::m_deallocated = 0;
-template <class T> size_t CustomAllocator<T>::m_byte = 0;*/
+template <class T> size_t CustomAllocator<T>::m_byte = 0;
 
 
 class Matrix {
 
 
 public:
-    Matrix(): m_rows(0), m_cols(0), m_data(vector<double, CustomAllocator<double>>(0)){}
+    Matrix(): m_rows(0), m_cols(0), m_data({}){}
     Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(vector<double, CustomAllocator<double>>(rows*cols)){}
     Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
         m_data = vector<double, CustomAllocator<double>>(m_cols*m_rows);
