@@ -48,94 +48,106 @@ template <class T> size_t CustomAllocator<T>::m_byte = 0;
 
 
 class Matrix {
+
+
 public:
-    Matrix(): nrow_(0), ncol_(0) {}
-    Matrix(int nrow, int ncol): nrow_(nrow), ncol_(ncol), data_(nrow * ncol) {}
-
-    int nrow() const { return nrow_; }
-    int ncol() const { return ncol_; }
-
-    double& operator()(int i, int j) { return data_[i * ncol_ + j]; }
-    const double& operator()(int i, int j) const { return data_[i * ncol_ + j]; }
-    double* data() { return data_.data(); }
-    const double* data() const { return data_.data(); }
-    bool operator ==(const Matrix &m) const
-    {
-        if (this->nrow() != m.nrow() || this->ncol() != m.ncol())
-            return false;
-
-        for (int i=0; i < this->nrow(); i++)
-        {
-            for (int j=0; j < this->ncol(); j++)
-            {
-                if (this->operator()(i, j) != m(i, j))
-                    return false;
+    Matrix(): m_rows(0), m_cols(0){}
+    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(rows*cols){}
+    Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
+        m_data = vector<double, CustomAllocator<double>>(m_cols*m_rows);
+        for (int i = 0; i < m_rows; i++){
+            for (int j = 0; j < m_cols; j++){
+                m_data[i*m_cols+j] = m(i, j);
             }
         }
-
+    }
+    double &operator()(int x, int y){
+        return m_data[y*m_cols+x];
+    }
+    const double &operator() (int x, int y) const{
+        return m_data[y*m_cols+x];
+    }
+    bool operator ==(const Matrix &m) const{
+        if (m_rows != m.nrow() || m_cols != m.ncol()){
+            return false;
+        }
+        for (int i = 0; i < m_rows; i++){
+            for (int j = 0; j < m_cols; j++){
+                if ((*this)(i, j) != m(i, j)){
+                    return false;
+                }
+            }
+        }
         return true;
+    }
+    int nrow() const{ 
+        return m_rows; 
+    }
+    int ncol() const{ 
+        return m_cols;
+    }
+    double* data(){
+        return m_data.data();
+    }
+    const double* data() const{
+        return m_data.data();
     }
 
 private:
-    int nrow_, ncol_;
-    std::vector<double, CustomAllocator<double>> data_;
+    int m_rows;
+    int m_cols;
+    vector<double, CustomAllocator<double>> m_data;
 };
 
-Matrix multiply_naive(const Matrix& a, const Matrix& b) {
-    if (a.ncol() != b.nrow())
-    {
-        throw std::out_of_range("matrix column differs from row size");
-    }
-
-    Matrix c(a.nrow(), b.ncol());
-
-    for (int i = 0; i < a.nrow(); ++i) {
-        for (int j = 0; j < b.ncol(); ++j) {
+Matrix multiply_naive(Matrix const &m1, Matrix const &m2){
+    Matrix ret(m1.nrow(), m2.ncol());
+    for (int i = 0; i < m1.nrow(); i++) {
+        for (int j = 0; j < m2.ncol(); j++) {
             double sum = 0.0;
-            for (int k = 0; k < a.ncol(); ++k) {
-                sum += a(i, k) * b(k, j);
+            for (int k = 0; k < m1.ncol(); k++) {
+                sum += m1(i, k) * m2(k, j);
             }
-            c(i, j) = sum;
+            ret(i, j) = sum;
         }
     }
-
-    return c;
+    return ret;
 }
 
-Matrix multiply_tile(const Matrix& a, const Matrix& b, int tile_size) {
-    Matrix c(a.nrow(), b.ncol());
+Matrix multiply_tile(Matrix const &m1, Matrix const &m2, int const tile_size){
+    int m = m1.nrow();
+    int n = m2.ncol();
+    int k = m1.ncol();
 
-    for (int i0 = 0; i0 < a.nrow(); i0 += tile_size) {
-        int i1 = std::min(i0 + tile_size, a.nrow());
-        for (int j0 = 0; j0 < b.ncol(); j0 += tile_size) {
-            int j1 = std::min(j0 + tile_size, b.ncol());
-            for (int k0 = 0; k0 < a.ncol(); k0 += tile_size) {
-                int k1 = std::min(k0 + tile_size, a.ncol());
-                for (int i = i0; i < i1; ++i) {
-                    for (int j = j0; j < j1; ++j) {
+    Matrix ret(m, n);
+    for (int i0 = 0; i0 < m; i0 += tile_size) {
+        int imax = std::min(i0 + tile_size, m);
+        for (int j0 = 0; j0 < n; j0 += tile_size) {
+            int jmax = std::min(j0 + tile_size, n);
+            for (int k0 = 0; k0 < k; k0 += tile_size) {
+                int kmax = std::min(k0 + tile_size, k);
+                for (int i = i0; i < imax; i++) {
+                    for (int j = j0; j < jmax; j++) {
                         double sum = 0.0;
-                        for (int k = k0; k < k1; ++k) {
-                            sum += a(i, k) * b(k, j);
+                        for (int l = k0; l < kmax; l++) {
+                            sum += m1(i, l) * m2(l, j);
                         }
-                        c(i, j) += sum;
+                        ret(i, j) += sum;
                     }
                 }
             }
         }
     }
 
-    return c;
+    return ret;
+    
 }
 
-Matrix multiply_mkl(const Matrix& a, const Matrix& b) {
-    Matrix c(a.nrow(), b.ncol());
-
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
-                a.nrow(), b.ncol(), a.ncol(), 1.0,
-                a.data(), a.ncol(), b.data(), b.ncol(),
-                0.0, const_cast<double*>(c.data()), c.ncol());
-
-    return c;
+Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
+    mkl_set_num_threads(1);
+    Matrix ret(m1.nrow(), m2.ncol());
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.nrow(),  m2.ncol(), m1.ncol(), 1.0 , m1.data(),
+     m1.ncol(), m2.data(), m2.ncol(), 0.0, const_cast<double*>(ret.data()), ret.ncol());
+    return ret;
 }
 
 
