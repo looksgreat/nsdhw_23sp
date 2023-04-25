@@ -14,9 +14,7 @@ class CustomAllocator{
 public:
     using value_type = T;
     CustomAllocator() = default;
-    static size_t bytes(){
-        return m_byte;
-    }
+    
     T* allocate(size_t n){
         if (n > numeric_limits<size_t>::max()/sizeof(T)) throw bad_alloc();
         m_allocated += n*sizeof(T);
@@ -37,13 +35,16 @@ public:
     static size_t deallocated(){
         return m_deallocated;
     }
+    static size_t bytes(){
+        return m_byte;
+    }
 private:
-    static size_t m_allocated, m_deallocated, m_byte;
+    static size_t m_allocated = 0, m_deallocated = 0, m_byte = 0;
 };
 
-template <class T> size_t CustomAllocator<T>::m_allocated = 0;
+/*template <class T> size_t CustomAllocator<T>::m_allocated = 0;
 template <class T> size_t CustomAllocator<T>::m_deallocated = 0;
-template <class T> size_t CustomAllocator<T>::m_byte = 0;
+template <class T> size_t CustomAllocator<T>::m_byte = 0;*/
 
 
 class Matrix {
