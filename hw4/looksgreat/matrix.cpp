@@ -78,7 +78,7 @@ public:
 
 private:
     int m_row, m_col;
-    std::vector<double, ByteCounter<double>> m_data;
+    std::vector<double, CustomAllocator<double>> m_data;
 };
 
 Matrix multiply_naive(Matrix const &m1, Matrix const &m2){
