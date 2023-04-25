@@ -14,32 +14,33 @@ class CustomAllocator{
 public:
     using value_type = T;
     CustomAllocator() = default;
-    static int bytes(){
+    static size_t bytes(){
         return m_allocated - m_deallocated;
     }
-    T* allocate(int n){
+    T* allocate(size_t n){
+        if (n > numeric_limits<size_t>::max()/sizeof(T)) throw bad_alloc();
         m_allocated += n*sizeof(T);
         T *ret = (T *)(malloc(n*sizeof(T)));
         if(ret == nullptr)
             throw std::bad_alloc();
         return ret;
     }
-    void deallocate(T *ptr, int n){
+    void deallocate(T *ptr, size_t n){
         m_deallocated += n*sizeof(T);
         free(ptr);
     }
-    static int allocated(){
+    static size_t allocated(){
         return m_allocated;
     }
-    static int deallocated(){
+    static size_t deallocated(){
         return m_deallocated;
     }
 private:
-    static int m_allocated, m_deallocated;
+    static size_t m_allocated, m_deallocated;
 };
 
-template <class T> int CustomAllocator<T>::m_allocated = 0;
-template <class T> int CustomAllocator<T>::m_deallocated = 0;
+template <class T> size_t CustomAllocator<T>::m_allocated = 0;
+template <class T> size_t CustomAllocator<T>::m_deallocated = 0;
 
 
 class Matrix {
@@ -47,7 +48,7 @@ class Matrix {
 
 public:
     Matrix(): m_rows(0), m_cols(0){}
-    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(rows*cols){}
+    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(vector<double, CustomAllocator<double>>(rows*cols)){}
     Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
         m_data = vector<double, CustomAllocator<double>>(m_cols*m_rows);
         for (int i = 0; i < m_rows; i++){
