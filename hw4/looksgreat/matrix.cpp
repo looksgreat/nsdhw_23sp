@@ -48,55 +48,37 @@ template <class T> size_t CustomAllocator<T>::m_byte = 0;
 
 
 class Matrix {
-
-
 public:
-    Matrix(): m_rows(0), m_cols(0), m_data({}){}
-    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(vector<double, CustomAllocator<double>>(rows*cols)){}
-    Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
-        m_data = vector<double, CustomAllocator<double>>(m_cols*m_rows);
-        for (int i = 0; i < m_rows; i++){
-            for (int j = 0; j < m_cols; j++){
-                m_data[i*m_cols+j] = m(i, j);
-            }
-        }
-    }
-    double &operator()(int x, int y){
-        return m_data[y*m_cols+x];
-    }
-    const double &operator() (int x, int y) const{
-        return m_data[y*m_cols+x];
-    }
-    bool operator ==(const Matrix &m) const{
-        if (m_rows != m.nrow() || m_cols != m.ncol()){
+    Matrix(): nrow_(0), ncol_(0) {}
+    Matrix(int nrow, int ncol): nrow_(nrow), ncol_(ncol), data_(nrow * ncol) {}
+
+    int nrow() const { return nrow_; }
+    int ncol() const { return ncol_; }
+
+    double& operator()(int i, int j) { return data_[i * ncol_ + j]; }
+    const double& operator()(int i, int j) const { return data_[i * ncol_ + j]; }
+    double* data() { return data_.data(); }
+    const double* data() const { return data_.data(); }
+    bool operator ==(const Matrix &m) const
+    {
+        if (this->nrow() != m.nrow() || this->ncol() != m.ncol())
             return false;
-        }
-        for (int i = 0; i < m_rows; i++){
-            for (int j = 0; j < m_cols; j++){
-                if ((*this)(i, j) != m(i, j)){
+
+        for (int i=0; i < this->nrow(); i++)
+        {
+            for (int j=0; j < this->ncol(); j++)
+            {
+                if (this->operator()(i, j) != m(i, j))
                     return false;
-                }
             }
         }
+
         return true;
-    }
-    int nrow() const{ 
-        return m_rows; 
-    }
-    int ncol() const{ 
-        return m_cols;
-    }
-    double* data(){
-        return m_data.data();
-    }
-    const double* data() const{
-        return m_data.data();
     }
 
 private:
-    int m_rows;
-    int m_cols;
-    vector<double, CustomAllocator<double>> m_data;
+    int nrow_, ncol_;
+    std::vector<double, CustomAllocator<double>> data_;
 };
 
 Matrix multiply_naive(const Matrix& a, const Matrix& b) {
