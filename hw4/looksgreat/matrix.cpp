@@ -40,8 +40,9 @@ class Matrix {
 
 
 public:
-    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(rows*cols){
-        memset(m_data, 0, sizeof(double)*rows*cols);
+    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols)/*, m_data(rows*cols)*/{
+        //memset(m_data, 0, sizeof(double)*rows*cols);
+        m_data(rows*cols, 0.0);
     }
     Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
         m_data = vector<double, CustomAllocator<double>>(m_cols*m_rows);
@@ -57,7 +58,13 @@ public:
     double &operator()(int x, int y){
         return m_data[y*m_cols+x];
     }
+    const double &operator()(int x, int y){
+        return m_data[y*m_cols+x];
+    }
     double operator()(int x, int y) const{
+        return m_data[y*m_cols+x];
+    }
+    const double operator()(int x, int y) const{
         return m_data[y*m_cols+x];
     }
     bool operator ==(const Matrix &m) const{
@@ -79,8 +86,11 @@ public:
     int ncol() const{ 
         return m_cols;
     }
-    double* data() const{
-        return m_data;
+    double* data(){
+        return m_data.data();
+    }
+    const double* data() const{
+        return m_data.data();
     }
 
 private:
@@ -134,7 +144,7 @@ Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
     mkl_set_num_threads(1);
     Matrix ret(m1.nrow(), m2.ncol());
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m1.nrow(),  m2.ncol(), m1.ncol(), 1.0 , m1.data(),
-     m1.ncol(), m2.data(), m2.ncol(), 0.0, ret.data(), ret.ncol());
+     m1.ncol(), m2.data(), m2.ncol(), 0.0, const_cast<double*>(ret.data()), ret.ncol());
     return ret;
 }
 
@@ -148,7 +158,10 @@ PYBIND11_MODULE(_matrix, m){
     m.def("allocated", &CustomAllocator<double>::allocated);
     m.def("deallocated", &CustomAllocator<double>::deallocated);
     py::class_<Matrix>(m, "Matrix")
+        .def(pybind11::init<>())
         .def(py::init<int, int>())
+        .def("data", pybind11::overload_cast<>(&Matrix::data))
+        .def("data", pybind11::overload_cast<>(&Matrix::data, pybind11::const_))
         .def_property_readonly("nrow", [](const Matrix &mat) { return mat.nrow(); })
         .def_property_readonly("ncol", [](const Matrix &mat) { return mat.ncol(); })
         .def("__eq__", [](const Matrix &a, const Matrix &b) { 
