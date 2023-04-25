@@ -19,11 +19,14 @@ public:
     }
     T* allocate(int n){
         m_allocated += n*sizeof(T);
-        return new T[n];
+        T *ret = (T *)(malloc(n*sizeof(T)));
+        if(ret == nullptr)
+            throw std::bad_alloc();
+        return ret;
     }
     void deallocate(T *ptr, int n){
         m_deallocated += n*sizeof(T);
-        delete[] ptr;
+        free(ptr);
     }
     int allocated(){
         return m_allocated;
@@ -58,13 +61,13 @@ public:
     double &operator()(int x, int y){
         return m_data[y*m_cols+x];
     }
-    const double &operator()(int x, int y){
+    const double &operator() const(int x, int y){
         return m_data[y*m_cols+x];
     }
     double operator()(int x, int y) const{
         return m_data[y*m_cols+x];
     }
-    const double operator()(int x, int y) const{
+    const double operator() const(int x, int y) const{
         return m_data[y*m_cols+x];
     }
     bool operator ==(const Matrix &m) const{
