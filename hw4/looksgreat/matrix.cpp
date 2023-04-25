@@ -27,18 +27,18 @@ public:
     }
 private:
     int m_allocated, m_deallocated;
-}
+};
 
 
 class Matrix {
 
 
 public:
-    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(new double[rows*cols]){
+    Matrix(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(rows*cols){
         memset(m_data, 0, sizeof(double)*rows*cols);
     }
     Matrix(const Matrix &m) : m_cols(m.ncol()), m_rows(m.nrow()){
-        m_data = new double[m_rows*m_cols];
+        m_data = vector<double, CustomAllocator<double>>(m_cols*m_rows);
         for (int i = 0; i < m_rows; i++){
             for (int j = 0; j < m_cols; j++){
                 m_data[i*m_cols+j] = m(i, j);
