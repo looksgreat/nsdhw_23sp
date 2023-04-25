@@ -151,27 +151,26 @@ Matrix multiply_mkl(Matrix const &m1, Matrix const &m2){
 }
 
 
-PYBIND11_MODULE(_matrix, m){
-    m.doc() = "matrix-matrix multiplication";
-    m.def("multiply_naive", &multiply_naive, "naive");
-    m.def("multiply_tile", &multiply_tile, "tile");
-    m.def("multiply_mkl", &multiply_mkl, "mkl");
+PYBIND11_MODULE(_matrix, m)
+{
+    m.doc() = "matrix multiplication testing";
+    m.def("multiply_naive", &multiply_naive);
+    m.def("multiply_tile", &multiply_tile);
+    m.def("multiply_mkl", &multiply_mkl);
     m.def("bytes", &CustomAllocator<double>::bytes);
     m.def("allocated", &CustomAllocator<double>::allocated);
     m.def("deallocated", &CustomAllocator<double>::deallocated);
-    py::class_<Matrix>(m, "Matrix")
-        .def(py::init<>())
-        .def(py::init<int, int>())
+
+    pybind11::class_<Matrix>(m, "Matrix")
+        .def(pybind11::init<>())
+        .def(pybind11::init<int, int>())
         .def("data", pybind11::overload_cast<>(&Matrix::data))
         .def("data", pybind11::overload_cast<>(&Matrix::data, pybind11::const_))
+        // .def("__call__", pybind11::overload_cast<int, int>(&Matrix::operator()), pybind11::return_value_policy::reference_internal)
+        // .def("__call__", pybind11::overload_cast<int, int>(&Matrix::operator(), pybind11::const_), pybind11::return_value_policy::reference_internal)
+        .def("__setitem__", [](Matrix &self, std::pair<int, int> id, double val) { self(id.first, id.second) = val; })
+        .def("__getitem__", [](const Matrix &self, std::pair<int, int> id) { return self(id.first, id.second); })
+        .def("__eq__", [](const Matrix &m1, const Matrix &m2) { return m1 == m2; })
         .def_property_readonly("nrow", [](const Matrix &mat) { return mat.nrow(); })
-        .def_property_readonly("ncol", [](const Matrix &mat) { return mat.ncol(); })
-        .def("__eq__", [](const Matrix &a, const Matrix &b) { 
-            return a == b; })
-        .def("__setitem__", [](Matrix &self, std::pair<int, int> idx, double val) {
-            self(idx.first, idx.second) = val;
-        })
-        .def("__getitem__", [](const Matrix &self, std::pair<int, int> idx) {
-            return self(idx.first, idx.second);
-        });
+        .def_property_readonly("ncol", [](const Matrix &mat) { return mat.ncol(); });
 }
