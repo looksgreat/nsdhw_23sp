@@ -25,6 +25,12 @@ public:
         m_deallocated += n*sizeof(T);
         delete[] ptr;
     }
+    int allocated(){
+        return m_allocated;
+    }
+    int deallocated(){
+        return m_deallocated;
+    }
 private:
     int m_allocated, m_deallocated;
 };
